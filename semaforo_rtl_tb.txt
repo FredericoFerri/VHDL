@@ -1,0 +1,51 @@
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+
+entity function1_tb is
+
+end function1_tb;
+
+architecture fluxo_de_dados of function1_tb is
+    component semaforo
+        
+        port ( CLK, CLR : in std_logic;
+                      Z : out std_logic_vector(1 downto 0) );
+       
+    end component;
+    
+        constant PERIODO : time := 10 ns;
+        signal CLR : std_logic;
+        signal ENT_CLK : std_logic := '0';
+        signal ENT_CLK_ENABLE: std_logic := '1'; 
+        signal Z : std_logic_vector(1 downto 0);
+        
+    begin
+        ENT_CLK <= ENT_CLK_ENABLE and not ENT_CLK after PERIODO/2;
+        ENT_CLK_ENABLE <= '1', '0' after 20*PERIODO; -- a simulação termina após transcorrer 20 períodos de clock.
+    
+        instancia : semaforo port map(
+          CLR => clr,
+          CLK => ENT_CLK,
+          Z => z
+        );
+       
+    -- a partir daqui declaro os estímulos de entrada, ou a injecao de sinais
+    -- um process para o reset
+    reset: process
+    begin
+        CLR <= '1';
+        wait for 2*PERIODO; -- um reset de duração de 2 períodos de clock
+        CLR <= '0';
+        wait;
+    end process reset;
+   
+    
+    -- um outro process para os estímulos da entrada D
+    stimulus: process
+    begin
+    
+        wait;
+    end process stimulus;
+   
+end fluxo_de_dados;
